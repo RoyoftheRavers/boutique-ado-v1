@@ -28,6 +28,6 @@ class Product(models.Model):
 
 
     def __str__(self):
-        return models.CharField(max_length=254)
+        return self.name
 
 
