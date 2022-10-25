@@ -70,14 +70,22 @@
                                                 <i class="fas fa-minus"></i>
                                             </span>
                                         </button>
-                                        <input class="form-control qty-input" type="number" name="quantity" value="1"
-                                            min="1" max="99" data-item-id="{{ product.id }}"
-                                            id="id_qty_{{ product.id }}">
+                                    </div>
+                                    <input class="form-control qty-input" type="number" name="quantity" value="1"
+                                        min="1" max="99" data-item-id="{{ product.id }}" id="id_qty_{{ product.id }}">
+                                    <div class="input-group-append">
+                                        <button class="increment-qty btn btn-black rounded-0"
+                                            data-item-id="{{ product.id }}" id="increment-qty_{{ product.id }}">
+                                            <span class="icon">
+                                                <i class="fas fa-plus"></i>
+                                            </span>
+                                        </button>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        <div class="col-12">
+
+                        <div class="col{% if s %}-12 mt-2{% endif %}">
                             <a href="{% url 'products' %}" class="btn btn-outline-black rounded-0 mt-5">
                                 <span class="icon">
                                     <i class="fas fa-chevron-left"></i>
@@ -94,4 +102,9 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block postloadjs %}
+{{ block.super }}
+{% include 'products/includes/quantity_input_script.html' %}
 {% endblock %}
