@@ -22,6 +22,24 @@ Another blue button should appear to click: _Open Browser_.
 
 In Gitpod you have superuser security privileges by default. Therefore you do not need to use the `sudo` (superuser do) command in the bash terminal in any of the lessons.
 
+## Local Setup (Outside Gitpod)
+
+`requirements.txt` pins 2021-era package versions (Django 3.2.8, Pillow 8.4.0, django-allauth 0.45.0). If you're setting up a venv locally instead of using Gitpod:
+
+- **Use Python 3.10.** Pillow 8.4.0 has no wheels for Python 3.11+, and Django 3.2 doesn't support the newest Python versions either.
+- **Pin setuptools before installing.** `django-allauth==0.45.0` has a legacy `setup.py` that imports `convert_path` from `setuptools`, which recent setuptools releases removed. If `pip install -r requirements.txt` fails with `ImportError: cannot import name 'convert_path' from 'setuptools'`, run this first:
+
+  ```
+  pip install "setuptools<71" wheel
+  pip install --no-build-isolation -r requirements.txt
+  ```
+
+- **Load the fixtures after migrating.** `manage.py migrate` only creates the schema — the site will load with no products until you also run:
+
+  ```
+  python manage.py loaddata categories products
+  ```
+
 ## Updates Since The Instructional Video
 
 We continually tweak and adjust this template to help give you the best experience. Here is the version history:
