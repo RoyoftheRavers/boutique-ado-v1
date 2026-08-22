@@ -48,13 +48,49 @@
                             <p class="my-0 small text-muted">SKU: {{ item.product.sku|upper }}</p>
                         </td>
                         <td class="py-3">
-                            <p class="my-0">{{ item.product.price }}</p>
-                        </td>
-                        <td class="py-3">
-                            <p class="my-0">{{ item.quantity }}</p>
-                        </td>
-                        <td class="py-3">
                             <p class="my-0">€{{ item.product.price }}</p>
+                        </td>
+                        <td class="py-3">
+                            <form class="form update-form" method="POST"
+                                action="{% url 'adjust_bag' item.item_id %}">
+                                {% csrf_token %}
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <button class="decrement-qty btn btn-black rounded-0" type="button"
+                                            data-item-id="{{ item.item_id }}"
+                                            id="decrement-qty_{{ item.item_id }}">
+                                            <span class="icon"><i class="fas fa-minus"></i></span>
+                                        </button>
+                                    </div>
+                                    <input class="form-control qty-input" type="number" name="quantity"
+                                        value="{{ item.quantity }}" min="1" max="99"
+                                        data-item-id="{{ item.item_id }}" id="id_qty_{{ item.item_id }}">
+                                    <div class="input-group-append">
+                                        <button class="increment-qty btn btn-black rounded-0" type="button"
+                                            data-item-id="{{ item.item_id }}"
+                                            id="increment-qty_{{ item.item_id }}">
+                                            <span class="icon"><i class="fas fa-plus"></i></span>
+                                        </button>
+                                    </div>
+                                </div>
+                                {% if item.product.has_sizes %}
+                                <input type="hidden" name="product_size" value="{{ item.size }}">
+                                {% endif %}
+                                <button type="submit"
+                                    class="btn btn-sm btn-black rounded-0 text-uppercase mt-2">Update</button>
+                            </form>
+                            <form method="POST" action="{% url 'adjust_bag' item.item_id %}" class="mt-1">
+                                {% csrf_token %}
+                                <input type="hidden" name="quantity" value="0">
+                                {% if item.product.has_sizes %}
+                                <input type="hidden" name="product_size" value="{{ item.size }}">
+                                {% endif %}
+                                <button type="submit"
+                                    class="btn btn-sm btn-outline-danger rounded-0 text-uppercase">Remove</button>
+                            </form>
+                        </td>
+                        <td class="py-3">
+                            <p class="my-0">€{{ item.subtotal|floatformat:2 }}</p>
                         </td>
                     </tr>
                     {% endfor %}
@@ -102,3 +138,8 @@
     </div>
 </div>
 {% endblock%}
+
+{% block postloadjs %}
+{{ block.super }}
+{% include 'products/includes/quantity_input_script.html' %}
+{% endblock %}
