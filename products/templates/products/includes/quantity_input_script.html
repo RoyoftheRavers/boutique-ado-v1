@@ -26,7 +26,7 @@
         e.preventDefault();
         var closestInput = $(this).closest('.input-group').find('.qty-input')[0];
         var currentValue = parseInt($(closestInput).val());
-        $(closestInput).val(currentValue + 1);
+        $(closestInput).val(currentValue + 1).trigger('change');
         var itemId = $(this).data('item-id');
         handleEnableDisable(itemId);
     });
@@ -36,7 +36,7 @@
         e.preventDefault();
         var closestInput = $(this).closest('.input-group').find('.qty-input')[0];
         var currentValue = parseInt($(closestInput).val());
-        $(closestInput).val(currentValue - 1);
+        $(closestInput).val(currentValue - 1).trigger('change');
         var itemId = $(this).data('item-id');
         handleEnableDisable(itemId);
     });

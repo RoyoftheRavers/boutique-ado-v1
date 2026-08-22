@@ -1,4 +1,7 @@
 from django.shortcuts import render, redirect, reverse
+from django.http import JsonResponse
+
+from .contexts import bag_contents
 
 # Create your views here.
 
@@ -58,4 +61,23 @@ def adjust_bag(request, item_id):
             bag.pop(item_id)
 
     request.session['bag'] = bag
+
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        context = bag_contents(request)
+        item_subtotal = 0
+        for bag_item in context['bag_items']:
+            if str(bag_item['item_id']) == str(item_id) and bag_item.get('size') == size:
+                item_subtotal = bag_item['subtotal']
+                break
+        return JsonResponse({
+            'quantity': quantity,
+            'removed': quantity <= 0,
+            'item_subtotal': float(item_subtotal),
+            'total': float(context['total']),
+            'delivery': float(context['delivery']),
+            'grand_total': float(context['grand_total']),
+            'free_delivery_delta': float(context['free_delivery_delta']),
+            'product_count': context['product_count'],
+        })
+
     return redirect(reverse('view_bag'))

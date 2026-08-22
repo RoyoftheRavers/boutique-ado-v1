@@ -36,7 +36,7 @@
                     </thead>
 
                     {% for item in bag_items %}
-                    <tr>
+                    <tr id="bag-item-row-{{ item.item_id }}{% if item.size %}-{{ item.size }}{% endif %}">
                         <td class="p-3 w-25">
                             <img src="{{ item.product.image.url }}" class="img-fluid rounded">
                         </td>
@@ -52,7 +52,8 @@
                         </td>
                         <td class="py-3">
                             <form class="form update-form" method="POST"
-                                action="{% url 'adjust_bag' item.item_id %}">
+                                action="{% url 'adjust_bag' item.item_id %}" data-item-id="{{ item.item_id }}"
+                                {% if item.size %}data-item-size="{{ item.size }}"{% endif %}>
                                 {% csrf_token %}
                                 <div class="input-group">
                                     <div class="input-group-prepend">
@@ -62,7 +63,7 @@
                                             <span class="icon"><i class="fas fa-minus"></i></span>
                                         </button>
                                     </div>
-                                    <input class="form-control qty-input" type="number" name="quantity"
+                                    <input class="form-control qty-input bag-qty-input" type="number" name="quantity"
                                         value="{{ item.quantity }}" min="1" max="99"
                                         data-item-id="{{ item.item_id }}" id="id_qty_{{ item.item_id }}">
                                     <div class="input-group-append">
@@ -79,7 +80,9 @@
                                 <button type="submit"
                                     class="btn btn-sm btn-black rounded-0 text-uppercase mt-2">Update</button>
                             </form>
-                            <form method="POST" action="{% url 'adjust_bag' item.item_id %}" class="mt-1">
+                            <form method="POST" action="{% url 'adjust_bag' item.item_id %}" class="mt-1 remove-form"
+                                data-item-id="{{ item.item_id }}"
+                                {% if item.size %}data-item-size="{{ item.size }}"{% endif %}>
                                 {% csrf_token %}
                                 <input type="hidden" name="quantity" value="0">
                                 {% if item.product.has_sizes %}
@@ -90,21 +93,21 @@
                             </form>
                         </td>
                         <td class="py-3">
-                            <p class="my-0">€{{ item.subtotal|floatformat:2 }}</p>
+                            <p class="my-0" id="item-subtotal-{{ item.item_id }}{% if item.size %}-{{ item.size }}{% endif %}">€{{ item.subtotal|floatformat:2 }}</p>
                         </td>
                     </tr>
                     {% endfor %}
                     <tr>
                         <td colspan="5" class="pt-5 text-right">
-                            <h6><strong>Bag Total: €{{ total|floatformat:2 }}</strong></h6>
-                            <h6>Delivery: €{{ delivery|floatformat:2 }}</h6>
-                            <h4 class="mt-4"><strong>Grand Total: €{{ grand_total|floatformat:2 }}</strong></h4>
-                            {% if free_delivery_delta > 0 %}
-                            <p class="mb-1 text-danger">
-                                You could get free delivery by spending just <strong>€{{ free_delivery_delta }}
+                            <h6><strong>Bag Total: €<span id="bag-total-value">{{ total|floatformat:2 }}</span></strong></h6>
+                            <h6>Delivery: €<span id="delivery-value">{{ delivery|floatformat:2 }}</span></h6>
+                            <h4 class="mt-4"><strong>Grand Total: €<span id="grand-total-value">{{ grand_total|floatformat:2 }}</span></strong></h4>
+                            <p class="mb-1 text-danger" id="free-delivery-msg"
+                                {% if free_delivery_delta <= 0 %}style="display: none;"{% endif %}>
+                                You could get free delivery by spending just
+                                <strong>€<span id="free-delivery-amount">{{ free_delivery_delta|floatformat:2 }}</span>
                                     more!</strong>
                             </p>
-                            {% endif %}
                         </td>
                     </tr>
                     <tr>
@@ -142,4 +145,71 @@
 {% block postloadjs %}
 {{ block.super }}
 {% include 'products/includes/quantity_input_script.html' %}
+
+<script type="text/javascript">
+    function updateBagTotals(data) {
+        $('#bag-total-value').text(data.total.toFixed(2));
+        $('#delivery-value').text(data.delivery.toFixed(2));
+        $('#grand-total-value').text(data.grand_total.toFixed(2));
+        $('.nav-bag-total').text(data.grand_total.toFixed(2));
+
+        if (data.free_delivery_delta > 0) {
+            $('#free-delivery-amount').text(data.free_delivery_delta.toFixed(2));
+            $('#free-delivery-msg').show();
+        } else {
+            $('#free-delivery-msg').hide();
+        }
+    }
+
+    function submitBagUpdate(form, onSuccess) {
+        var itemId = form.data('item-id');
+        var size = form.data('item-size');
+        fetch(form.attr('action'), {
+            method: 'POST',
+            body: form.serialize(),
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+        }).then(function (response) {
+            if (!response.ok) { throw new Error('Bag update failed'); }
+            return response.json();
+        }).then(function (data) {
+            onSuccess(data, itemId, size);
+        }).catch(function () {
+            location.reload();
+        });
+    }
+
+    // Live-update totals whenever a bag quantity input changes (typing or +/-)
+    $('.bag-qty-input').change(function () {
+        var form = $(this).closest('.update-form');
+        submitBagUpdate(form, function (data, itemId, size) {
+            var rowId = '#item-subtotal-' + itemId + (size ? '-' + size : '');
+            $(rowId).text('€' + data.item_subtotal.toFixed(2));
+            updateBagTotals(data);
+        });
+    });
+
+    // The change handler above already keeps totals live, so the Update
+    // button just needs to avoid a full page reload
+    $('.update-form').submit(function (e) {
+        e.preventDefault();
+    });
+
+    // Remove an item without a full page reload
+    $('.remove-form').submit(function (e) {
+        e.preventDefault();
+        var form = $(this);
+        submitBagUpdate(form, function (data, itemId, size) {
+            if (data.product_count <= 0) {
+                location.reload();
+                return;
+            }
+            var rowId = '#bag-item-row-' + itemId + (size ? '-' + size : '');
+            $(rowId).remove();
+            updateBagTotals(data);
+        });
+    });
+</script>
 {% endblock %}
