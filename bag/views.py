@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect, reverse, get_object_or_404
 from django.contrib import messages
 from django.http import JsonResponse
+from django.template.loader import render_to_string
 
 from products.models import Product
 from .contexts import bag_contents
@@ -56,6 +57,7 @@ def adjust_bag(request, item_id):
     if 'product_size' in request.POST:
         size = request.POST['product_size']
     bag = request.session.get('bag', {})
+    is_ajax = request.headers.get('x-requested-with') == 'XMLHttpRequest'
 
     try:
         product = get_object_or_404(Product, pk=item_id)
@@ -63,28 +65,41 @@ def adjust_bag(request, item_id):
         if size:
             if quantity > 0:
                 bag[item_id]['items_by_size'][size] = quantity
-                messages.success(request, f'Updated size {size.upper()} {product.name} quantity to {quantity}')
+                message = f'Updated size {size.upper()} {product.name} quantity to {quantity}'
             else:
                 del bag[item_id]['items_by_size'][size]
                 if not bag[item_id]['items_by_size']:
                     bag.pop(item_id)
-                messages.success(request, f'Removed size {size.upper()} {product.name} from your bag')
+                message = f'Removed size {size.upper()} {product.name} from your bag'
         else:
             if quantity > 0:
                 bag[item_id] = quantity
-                messages.success(request, f'Updated {product.name} quantity to {quantity}')
+                message = f'Updated {product.name} quantity to {quantity}'
             else:
                 bag.pop(item_id)
-                messages.success(request, f'Removed {product.name} from your bag')
+                message = f'Removed {product.name} from your bag'
 
         request.session['bag'] = bag
+
+        # AJAX requests (the bag page's live quantity/remove updates) don't
+        # reload the page, so a queued Django message would just pile up
+        # until the next full navigation. Render the same toast template
+        # server-side instead and let the frontend show it immediately.
+        if is_ajax:
+            toast_html = render_to_string(
+                'includes/toasts/toast_success.html', {'message': message}, request=request)
+        else:
+            messages.success(request, message)
     except Exception as e:
-        messages.error(request, f'Error updating item: {e}')
-        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
-            return JsonResponse({'error': str(e)}, status=500)
+        error_message = f'Error updating item: {e}'
+        if is_ajax:
+            toast_html = render_to_string(
+                'includes/toasts/toast_error.html', {'message': error_message}, request=request)
+            return JsonResponse({'error': str(e), 'toast_html': toast_html}, status=500)
+        messages.error(request, error_message)
         return redirect(reverse('view_bag'))
 
-    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+    if is_ajax:
         context = bag_contents(request)
         item_subtotal = 0
         for bag_item in context['bag_items']:
@@ -100,6 +115,7 @@ def adjust_bag(request, item_id):
             'grand_total': float(context['grand_total']),
             'free_delivery_delta': float(context['free_delivery_delta']),
             'product_count': context['product_count'],
+            'toast_html': toast_html,
         })
 
     return redirect(reverse('view_bag'))

@@ -161,6 +161,21 @@
         }
     }
 
+    // Show a toast rendered server-side from the same toast templates used
+    // for full-page-reload messages, without waiting for a page load
+    function showToast(html) {
+        if (!html) { return; }
+
+        // Only the latest action's toast should be visible at a time
+        $('.message-container .toast').toast('dispose').remove();
+
+        var toast = $(html).appendTo('.message-container');
+        toast.toast('show');
+        toast.on('hidden.bs.toast', function () {
+            $(this).remove();
+        });
+    }
+
     function submitBagUpdate(form, onSuccess) {
         var itemId = form.data('item-id');
         var size = form.data('item-size');
@@ -172,10 +187,14 @@
                 'Content-Type': 'application/x-www-form-urlencoded',
             },
         }).then(function (response) {
-            if (!response.ok) { throw new Error('Bag update failed'); }
-            return response.json();
-        }).then(function (data) {
-            onSuccess(data, itemId, size);
+            return response.json().then(function (data) {
+                return { ok: response.ok, data: data };
+            });
+        }).then(function (result) {
+            showToast(result.data.toast_html);
+            if (result.ok) {
+                onSuccess(result.data, itemId, size);
+            }
         }).catch(function () {
             location.reload();
         });
