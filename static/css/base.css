@@ -94,6 +94,21 @@ a.category-badge>span.badge:hover {
     cursor: pointer;
 }
 
+.message-container {
+    position: fixed;
+    top: 225px;
+    right: 15px;
+    z-index: 99999999999;
+}
+
+.custom-toast {
+    background-color: white;
+}
+
+.toast-capper {
+    height: 2px;
+}
+
 /* -------------- Media Queries -----------*/
 
 /* Slightly larger container on x1 screens */

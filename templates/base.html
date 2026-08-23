@@ -128,9 +128,21 @@
         </div>
     </header>
 
-    {% if messages %}
-    <div class="message-container"></div>
-    {% endif %}
+    <div class="message-container">
+        {% for message in messages %}
+        {% with message.level as level %}
+        {% if level == 40 %}
+        {% include 'includes/toasts/toast_error.html' %}
+        {% elif level == 30 %}
+        {% include 'includes/toasts/toast_warning.html' %}
+        {% elif level == 25 %}
+        {% include 'includes/toasts/toast_success.html' %}
+        {% else %}
+        {% include 'includes/toasts/toast_info.html' %}
+        {% endif %}
+        {% endwith %}
+        {% endfor %}
+    </div>
 
     {% block page_header %}
     {% endblock %}
@@ -151,10 +163,14 @@
             var headerHeight = $('header.fixed-top').outerHeight();
             if (headerHeight) {
                 $('.header-container').css('padding-top', headerHeight + 'px');
+                $('.message-container').css('top', (headerHeight + 15) + 'px');
             }
         }
         $(adjustHeaderSpacing);
         $(window).on('resize', adjustHeaderSpacing);
+    </script>
+    <script type="text/javascript">
+        $('.toast').toast('show');
     </script>
     {% endblock %}
 </body>
