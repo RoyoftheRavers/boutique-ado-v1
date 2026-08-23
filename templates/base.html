@@ -143,6 +143,19 @@
 
 
     {% block postloadjs %}
+    <script type="text/javascript">
+        // The delivery banner's text wraps differently at different widths,
+        // so the fixed header's height isn't a fixed number - measure it
+        // for real instead of guessing a padding value per breakpoint.
+        function adjustHeaderSpacing() {
+            var headerHeight = $('header.fixed-top').outerHeight();
+            if (headerHeight) {
+                $('.header-container').css('padding-top', headerHeight + 'px');
+            }
+        }
+        $(adjustHeaderSpacing);
+        $(window).on('resize', adjustHeaderSpacing);
+    </script>
     {% endblock %}
 </body>
 
