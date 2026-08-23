@@ -143,6 +143,12 @@ a.category-badge>span.badge:hover {
     border-bottom: 10px solid #17a2b8;
 }
 
+.bag-notification-wrapper {
+    max-height: 100px;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
 /* -------------- Media Queries -----------*/
 
 /* Slightly larger container on x1 screens */

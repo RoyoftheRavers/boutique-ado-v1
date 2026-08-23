@@ -9,6 +9,47 @@
         </button>
     </div>
     <div class="toast-body bg-white">
-        {{ message }}
+        <div class="row">
+            <div class="col">
+                {{ message }}
+            </div>
+        </div>
+        {% if grand_total %}
+        <hr class="my-1">
+        <div class="row">
+            <div class="col">
+                <p class="text-black mb-2">Your Bag ({{ product_count }})</p>
+                <div class="bag-notification-wrapper">
+                    {% for item in bag_items %}
+                    <div class="row">
+                        <div class="col-3 my-auto">
+                            <img class="w-100" src="{{ item.product.image.url }}" alt="{{ item.product.name }}">
+                        </div>
+                        <div class="col-9">
+                            <p class="my-0 small">
+                                {{ item.product.name }}
+                                {% if item.size %}
+                                <span class="text-muted">Size {{ item.size|upper }}</span>
+                                {% endif %}
+                                <br>Qty: {{ item.quantity }}
+                            </p>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                <hr class="my-1">
+                <strong>
+                    Total{% if free_delivery_delta > 0 %} (Exc. delivery){% endif %}: €{{ grand_total|floatformat:2 }}
+                </strong>
+                {% if free_delivery_delta > 0 %}
+                <p class="mb-0">
+                    You could get free delivery by spending just
+                    <strong>€{{ free_delivery_delta|floatformat:2 }}</strong> more!
+                </p>
+                {% endif %}
+                <a href="{% url 'view_bag' %}" class="btn btn-black rounded-0 btn-sm w-100 mt-2">Go To Bag</a>
+            </div>
+        </div>
+        {% endif %}
     </div>
 </div>
