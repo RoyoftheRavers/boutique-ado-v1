@@ -45,6 +45,10 @@ form.addEventListener('submit', function (ev) {
     ev.preventDefault();
     card.update({ disabled: true });
     $('#submit-button').attr('disabled', true);
+    // jQuery's slim build (what this site loads) has no fadeIn/fadeOut -
+    // toggle a CSS-transition class and use plain show/hide instead.
+    $('#payment-form').addClass('payment-form-fade');
+    $('#loading-overlay').show();
 
     stripe.confirmCardPayment(clientSecret, {
         payment_method: {
@@ -62,6 +66,8 @@ form.addEventListener('submit', function (ev) {
             $(errorDiv).html(html);
             card.update({ disabled: false });
             $('#submit-button').attr('disabled', false);
+            $('#payment-form').removeClass('payment-form-fade');
+            $('#loading-overlay').hide();
         } else {
             if (result.paymentIntent.status === 'succeeded') {
                 form.submit();

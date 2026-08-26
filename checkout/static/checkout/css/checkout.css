@@ -55,3 +55,33 @@ legend {
 .stripe-style-input::placeholder {
     color: #aab7c4;
 }
+
+/* Covers the page while the payment is processing. z-index is high
+   enough to sit above everything on this page, but deliberately well
+   below Stripe's own authentication popup (which uses its own very
+   high z-index), so that popup stays clickable on top of this. */
+#loading-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background: rgba(23, 162, 184, 0.5);
+    z-index: 9999;
+}
+
+.loading-spinner {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+}
+
+#payment-form {
+    transition: opacity 0.3s ease-in-out;
+}
+
+#payment-form.payment-form-fade {
+    opacity: 0.3;
+}
