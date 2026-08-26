@@ -1,1 +1,57 @@
-/* Checkout page styles will go here */
+.form-control,
+#card-element {
+    color: black;
+    border: 1px solid black;
+}
+
+legend {
+    padding-top: 0.3em;
+}
+
+/* From the Stripe docs, with the border-radius squared off to match the
+   site's sharp-edged theme and the invalid-card border matching
+   Bootstrap's text-danger color instead of Stripe's default orange. */
+.StripeElement {
+    box-sizing: border-box;
+    height: 40px;
+    padding: 10px 12px;
+    border: 1px solid black;
+    border-radius: 0;
+    background-color: white;
+}
+
+.StripeElement--focus {
+    box-shadow: 0 1px 3px 0 #cfd7df;
+}
+
+.StripeElement--invalid {
+    border-color: #dc3545;
+}
+
+.StripeElement--webkit-autofill {
+    background-color: #fefde5 !important;
+}
+
+/* Match the regular form fields to the Stripe card element */
+.stripe-style-input,
+.StripeElement {
+    display: block;
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 0;
+}
+
+.stripe-style-input:focus,
+.StripeElement--focus {
+    border: 1px solid black;
+    outline: 0;
+}
+
+.stripe-style-input.is-invalid,
+.StripeElement--invalid {
+    border: 1px solid #dc3545;
+}
+
+.stripe-style-input::placeholder {
+    color: #aab7c4;
+}

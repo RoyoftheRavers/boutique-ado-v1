@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect, reverse
 from django.contrib import messages
+from django.conf import settings
 
 from .forms import OrderForm
 
@@ -15,9 +16,16 @@ def checkout(request):
         return redirect(reverse('products'))
 
     order_form = OrderForm()
+
+    if not settings.STRIPE_PUBLIC_KEY:
+        messages.warning(request, 'Stripe public key is missing. \
+            Did you forget to set it in your environment?')
+
     template = 'checkout/checkout.html'
     context = {
         'order_form': order_form,
+        'stripe_public_key': settings.STRIPE_PUBLIC_KEY,
+        'client_secret': 'test client secret',
     }
 
     return render(request, template, context)
