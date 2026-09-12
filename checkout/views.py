@@ -1,6 +1,10 @@
+import json
+
 from django.shortcuts import render, redirect, reverse, get_object_or_404
 from django.contrib import messages
 from django.conf import settings
+from django.http import HttpResponse
+from django.views.decorators.http import require_POST
 
 import stripe
 
@@ -10,6 +14,30 @@ from products.models import Product
 from bag.contexts import bag_contents
 
 # Create your views here.
+
+
+@require_POST
+def cache_checkout_data(request):
+    """ Stash extra checkout data on the payment intent's metadata,
+    so the webhook handler can recover it if the form never submits """
+    try:
+        pid = request.POST.get('client_secret').split('_secret')[0]
+        stripe.api_key = settings.STRIPE_SECRET_KEY
+        stripe.PaymentIntent.modify(pid, metadata={
+            'bag': json.dumps(request.session.get('bag', {})),
+            'save_info': request.POST.get('save_info'),
+            'username': request.user,
+            # Stripe's shipping/billing address requires a 2-letter ISO
+            # country code if set, which this project's free-text country
+            # field can't guarantee, so it's never sent to Stripe's address
+            # object. Recover the real value from here instead.
+            'country': request.POST.get('country', ''),
+        })
+        return HttpResponse(status=200)
+    except Exception as e:
+        messages.error(request, 'Sorry, your payment cannot be \
+            processed right now. Please try again later.')
+        return HttpResponse(content=e, status=400)
 
 
 def checkout(request):
@@ -34,7 +62,11 @@ def checkout(request):
         }
         order_form = OrderForm(form_data)
         if order_form.is_valid():
-            order = order_form.save()
+            order = order_form.save(commit=False)
+            pid = request.POST.get('client_secret').split('_secret')[0]
+            order.stripe_pid = pid
+            order.original_bag = json.dumps(bag)
+            order.save()
             for item_id, item_data in bag.items():
                 try:
                     product = Product.objects.get(pk=item_id)
