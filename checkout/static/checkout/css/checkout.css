@@ -56,6 +56,18 @@ legend {
     color: #aab7c4;
 }
 
+/* Country select box: black by default, grey while showing the blank
+   "Country *" placeholder option (no country selected yet) */
+select,
+select option {
+    color: black;
+}
+
+select:invalid,
+select option[value=""] {
+    color: #757575;
+}
+
 /* Covers the page while the payment is processing. z-index is high
    enough to sit above everything on this page, but deliberately well
    below Stripe's own authentication popup (which uses its own very
