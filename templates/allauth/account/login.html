@@ -5,9 +5,10 @@
 
 {% block head_title %}{% trans "Sign In" %}{% endblock %}
 
-{% block content %}
+{% block inner_content %}
 
-<h1>{% trans "Sign In" %}</h1>
+<h2 class="logo-font mb-4">{% trans "Sign In" %}</h2>
+<hr>
 
 {% get_providers as socialaccount_providers %}
 
@@ -35,12 +36,24 @@ for a {{ site_name }} account and sign in below:{% endblocktrans %}</p>
 
 <form class="login" method="POST" action="{% url 'account_login' %}">
   {% csrf_token %}
-  {{ form.as_p }}
+  {{ form|crispy }}
   {% if redirect_field_value %}
   <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
   {% endif %}
-  <a class="button secondaryAction" href="{% url 'account_reset_password' %}">{% trans "Forgot Password?" %}</a>
-  <button class="primaryAction" type="submit">{% trans "Sign In" %}</button>
+  <button class="btn btn-black rounded-0 text-uppercase float-right" type="submit">{% trans "Sign In" %}</button>
 </form>
+
+<hr class="mt-5">
+<p class="text-center">
+  <a class="text-black" href="{% url 'account_reset_password' %}">{% trans "Forgot Password?" %}</a>
+</p>
+<p class="text-center mb-0">
+  <a class="btn btn-outline-black rounded-0" href="{% url 'home' %}">
+    <span class="icon">
+      <i class="fas fa-chevron-left"></i>
+    </span>
+    <span>{% trans "Home" %}</span>
+  </a>
+</p>
 
 {% endblock %}

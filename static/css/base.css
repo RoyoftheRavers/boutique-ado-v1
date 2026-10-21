@@ -149,6 +149,31 @@ a.category-badge>span.badge:hover {
     overflow-y: auto;
 }
 
+/* Allauth account pages (login, signup, password reset, etc.) - a
+   bordered white card matching checkout's sharp-edged, black-and-white
+   look, scoped so it doesn't affect unrelated form-control usage
+   elsewhere on the site (e.g. the nav search bar). */
+.allauth-form-inner-content {
+    background-color: white;
+    border: 1px solid black;
+    padding: 2rem;
+    margin: 2rem 0;
+}
+
+.allauth-form-inner-content .form-control {
+    border-radius: 0;
+    border: 1px solid black;
+    color: black;
+}
+
+.allauth-form-inner-content label {
+    font-weight: bold;
+}
+
+.allauth-form-inner-content .btn {
+    margin-bottom: 0.5rem;
+}
+
 /* -------------- Media Queries -----------*/
 
 /* Slightly larger container on x1 screens */
