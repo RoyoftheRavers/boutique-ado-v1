@@ -1,1 +1,30 @@
-/* Profile page styles will go here */
+/* Mirrors checkout.css's form field styling, for the same look here */
+.stripe-style-input {
+    display: block;
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 0;
+    border: 1px solid black;
+    color: black;
+}
+
+.stripe-style-input:focus {
+    border: 1px solid black;
+    outline: 0;
+}
+
+.stripe-style-input::placeholder {
+    color: #aab7c4;
+}
+
+/* Country select: black once chosen, grey while showing the blank
+   placeholder option (mirrors the checkout page's country field) */
+select,
+select option {
+    color: black;
+}
+
+select:invalid,
+select option[value=""] {
+    color: #757575;
+}
