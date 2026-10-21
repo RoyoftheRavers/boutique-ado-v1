@@ -17,14 +17,19 @@
     color: #aab7c4;
 }
 
-/* Country select: black once chosen, grey while showing the blank
-   placeholder option (mirrors the checkout page's country field) */
-select,
-select option {
+/* Country select and its options: black by default, except the first
+   (blank placeholder) option, which gets the placeholder grey. This
+   only colors the dropdown list itself - default_country is optional
+   (blank=True), so the select never gets the HTML required attribute
+   and :invalid (used on the checkout page's required country field)
+   never matches here. The select's own collapsed/displayed color is
+   handled in countryfield.js instead, since CSS alone can't react to
+   which option is currently selected. */
+#id_default_country,
+#id_default_country option {
     color: black;
 }
 
-select:invalid,
-select option[value=""] {
-    color: #757575;
+#id_default_country option:first-child {
+    color: #aab7c4;
 }
