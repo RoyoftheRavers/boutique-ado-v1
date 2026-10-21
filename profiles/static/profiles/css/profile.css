@@ -33,3 +33,10 @@
 #id_default_country option:first-child {
     color: #aab7c4;
 }
+
+/* Matches the height of the form column next to it, so a long order
+   history scrolls instead of growing past the form. */
+.order-history {
+    max-height: 416px;
+    overflow-y: auto;
+}
