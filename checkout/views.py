@@ -28,7 +28,7 @@ def cache_checkout_data(request):
         stripe.PaymentIntent.modify(pid, metadata={
             'bag': json.dumps(request.session.get('bag', {})),
             'save_info': request.POST.get('save_info'),
-            'username': request.user,
+            'username': str(request.user),
             # Stripe's shipping/billing address requires a 2-letter ISO
             # country code if set, which this project's free-text country
             # field can't guarantee, so it's never sent to Stripe's address
