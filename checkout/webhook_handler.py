@@ -8,6 +8,7 @@ import stripe
 
 from .models import Order, OrderLineItem
 from products.models import Product
+from profiles.models import UserProfile
 
 
 class StripeWH_handler:
@@ -37,6 +38,13 @@ class StripeWH_handler:
         pid = intent.id
         bag = intent.metadata.bag
         save_info = intent.metadata.save_info
+        username = intent.metadata.username
+
+        # Allow anonymous checkouts through the webhook too - profile stays
+        # None for them, same as the checkout_success view.
+        profile = None
+        if username != 'AnonymousUser':
+            profile = UserProfile.objects.get(user__username=username)
 
         # This API version doesn't expand `charges` on the PaymentIntent
         # (that field no longer exists) - billing_details now lives on the
@@ -89,10 +97,24 @@ class StripeWH_handler:
                 content=f'Webhook received: {event["type"]} | SUCCESS: Verified order already in database',
                 status=200)
         else:
+            # metadata values are always strings, so this must be compared
+            # against the literal 'true' - a non-empty 'false' string would
+            # otherwise be truthy too.
+            if profile is not None and save_info == 'true':
+                profile.default_phone_number = shipping_details.phone
+                profile.default_country = country
+                profile.default_postcode = shipping_details.address.postal_code
+                profile.default_town_or_city = shipping_details.address.city
+                profile.default_street_address1 = shipping_details.address.line1
+                profile.default_street_address2 = shipping_details.address.line2
+                profile.default_county = shipping_details.address.state
+                profile.save()
+
             order = None
             try:
                 order = Order.objects.create(
                     full_name=shipping_details.name,
+                    user_profile=profile,
                     email=billing_details.email,
                     phone_number=shipping_details.phone,
                     country=country,
