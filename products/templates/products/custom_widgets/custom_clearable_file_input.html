@@ -1,0 +1,19 @@
+{% if widget.is_initial %}
+<p>{{ widget.initial_text }}</p>
+<a href="{{ widget.value.url }}" target="_blank">
+    <img src="{{ widget.value.url }}" alt="{{ widget.value }}" class="custom-file-preview mb-2">
+</a>
+{% if not widget.required %}
+<div class="form-check mt-2">
+    <input type="checkbox" name="{{ widget.checkbox_name }}" id="{{ widget.checkbox_id }}"
+        class="form-check-input custom-file-clear-checkbox"{% if widget.attrs.disabled %} disabled{% endif %}>
+    <label for="{{ widget.checkbox_id }}" class="form-check-label">{{ widget.clear_checkbox_label }}</label>
+</div>
+{% endif %}
+<br>
+{% endif %}
+<span class="btn btn-black rounded-0 custom-file-upload-btn">
+    <i class="fas fa-upload mr-1"></i>Choose File
+    <input type="{{ widget.type }}" name="{{ widget.name }}"{% include "django/forms/widgets/attrs.html" %}>
+</span>
+<p class="custom-file-filename mt-2 small text-muted mb-0"></p>

@@ -208,3 +208,34 @@ a.category-badge>span.badge:hover {
         height: calc(100vh - 116px);
     }
 }
+
+/* Custom clearable file input widget (products/widgets.py) - the real
+   file input is invisible and stretched over the button-styled span so
+   clicking the button opens the file picker. */
+.custom-file-upload-btn {
+    overflow: hidden;
+    position: relative;
+}
+
+.custom-file-upload-btn input[type="file"] {
+    position: absolute;
+    top: 0;
+    right: 0;
+    min-width: 100%;
+    min-height: 100%;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.custom-file-preview {
+    max-height: 100px;
+}
+
+.custom-file-clear-checkbox {
+    border-radius: 0;
+}
+
+.custom-file-clear-checkbox:checked {
+    background-color: #dc3545;
+    border-color: #dc3545;
+}
